@@ -8,8 +8,9 @@ public class Spotkanie {
 		this.dzien = dzien;
 	}
 
-	public void przeprowadz() {
-		if (agentA.jestChory() || agentB.jestChory()) {
+	public void przeprowadz(double prawdZarazenia) {
+		if ((agentA.jestChory() || agentB.jestChory()) &&
+				Generator.getInstance().nextDouble() <= prawdZarazenia) {
 			agentA.zachoruj();
 			agentB.zachoruj();
 		}

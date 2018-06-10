@@ -1,6 +1,5 @@
 import java.util.TreeSet;
 import java.util.LinkedList;
-import java.util.Random;
 
 public class Towarzyski extends Agent {
 	
@@ -8,7 +7,10 @@ public class Towarzyski extends Agent {
 		super(id);
 	}
 
-	public TreeSet<Spotkanie> planujSpotkania(int dzien, int pozostaleDni, Random generator, double prawdSpotkania) {
+	public TreeSet<Spotkanie> planujSpotkania(
+			int dzien,
+			int pozostaleDni,
+			double prawdSpotkania) {
 		TreeSet<Spotkanie> spotkania = new TreeSet<Spotkanie>(new Cmp());
 		LinkedList<Agent> przyjaciele = new LinkedList<Agent>();
 		if (jestZdrowy()) {
@@ -18,11 +20,15 @@ public class Towarzyski extends Agent {
 			}
 		}
 		int liczbaZnajomych = przyjaciele.size();
-		while (liczbaZnajomych > 0 && generator.nextDouble() <= prawdSpotkania) {
+		if (liczbaZnajomych == 0) {
+			return spotkania;
+		}
+
+		while (Generator.getInstance().nextDouble() <= prawdSpotkania) {
 			spotkania.add(new Spotkanie(
-						this,
-						przyjaciele.get(generator.nextInt(liczbaZnajomych)),
-						generator.nextInt(pozostaleDni + 1) + dzien + 1));
+				this,
+				przyjaciele.get(Generator.getInstance().nextInt(liczbaZnajomych)),
+				Generator.getInstance().nextInt(pozostaleDni + 1) + dzien + 1));
 		}
 		return spotkania;
 	}

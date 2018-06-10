@@ -1,6 +1,5 @@
 import java.util.LinkedList;
 import java.util.TreeSet;
-import java.util.Random;
 
 abstract public class Agent {
 	private int id;
@@ -13,21 +12,23 @@ abstract public class Agent {
 		this.stan = Stan.ZDROWY;
 	}
 	
-	public void obudzSie(Random generator, double prawdWyzdrowienia, double smiertelnosc) {
+	public void obudzSie(double prawdWyzdrowienia, double smiertelnosc) {
 		if (stan != Stan.CHORY) {
 			return;
 		}
-
-		if (generator.nextDouble() <= smiertelnosc) {
+		if (Generator.getInstance().nextDouble() <= smiertelnosc) {
 			zgin();
 			return;
 		}
-		if (generator.nextDouble() <= prawdWyzdrowienia) {
+		if (Generator.getInstance().nextDouble() <= prawdWyzdrowienia) {
 			wyzdrowiej();
 		}
 	}
 
-	abstract public TreeSet<Spotkanie> planujSpotkania(int dzien, int pozostaleDni, Random generator, double prawdSpotkania);
+	abstract public TreeSet<Spotkanie> planujSpotkania(
+			int dzien,
+			int pozostaleDni,
+			double prawdSpotkania);
 
 	public void zachoruj() {
 		if (stan == Stan.ZDROWY) {

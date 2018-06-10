@@ -1,7 +1,5 @@
-import java.util.Scanner;
 import java.util.TreeSet;
 import java.util.LinkedList;
-import java.util.Random;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
 
@@ -18,16 +16,21 @@ public class Symulacja {
 		prawdWyzdrowienia,
 		smiertelnosc;
 	private Agent[] agenci;
-	private Random generator;
 	private TreeSet <Spotkanie> spotkania;
 	private PrintWriter zapis;
 
 	public Symulacja (
-			int seed, int liczbaAgentow, int liczbaDni, int srZnajomych,
-			double pTowarzyski, double pSpotkania, double pZarazenia,
-			double pWyzdrowienia, double smiertelnosc, String nazwaPliku) throws FileNotFoundException {
+			int seed,
+			int liczbaAgentow,
+			int liczbaDni,
+			int srZnajomych,
+			double pTowarzyski,
+			double pSpotkania,
+			double pZarazenia,
+			double pWyzdrowienia,
+			double smiertelnosc,
+			String nazwaPliku) throws FileNotFoundException {
 		this.agenci = new Agent[liczbaAgentow];
-		this.generator = new Random(seed);
 		this.spotkania = new TreeSet<Spotkanie>(new Cmp());
 		this.seed = seed;
 		this.liczbaAgentow = liczbaAgentow;
@@ -45,6 +48,7 @@ public class Symulacja {
 		{
 
 		}
+		Generator.init(seed);
 
 		zapis.println("# twoje wyniki powinny zawierać te komentarze");
 		zapis.println("seed=" + this.seed);
@@ -62,7 +66,7 @@ public class Symulacja {
 	private void przygotujDane() {
 		// Losuje towarzyskosc
 		for (int i = 0; i < liczbaAgentow; i++) {
-			if (generator.nextDouble() <= prawdTowarzyski) {
+			if (Generator.getInstance().nextDouble() <= prawdTowarzyski) {
 				agenci[i] = new Towarzyski(i);
 			}
 			else {
@@ -73,18 +77,18 @@ public class Symulacja {
 		// Losuje graf
 		int liczbaKrawedzi = srZnajomych * liczbaAgentow / 2;
 		for (int i = 1; i <= liczbaKrawedzi; i++) {
-			Agent agentA = agenci[generator.nextInt(liczbaAgentow)];
-			Agent agentB = agenci[generator.nextInt(liczbaAgentow)];
+			Agent agentA = agenci[Generator.getInstance().nextInt(liczbaAgentow)];
+			Agent agentB = agenci[Generator.getInstance().nextInt(liczbaAgentow)];
 			while (agentA.czyZna(agentB)) {
-				agentA = agenci[generator.nextInt(liczbaAgentow)];
-				agentB = agenci[generator.nextInt(liczbaAgentow)];
+				agentA = agenci[Generator.getInstance().nextInt(liczbaAgentow)];
+				agentB = agenci[Generator.getInstance().nextInt(liczbaAgentow)];
 			}
 			agentA.dodajZnajomego(agentB);
 			agentB.dodajZnajomego(agentA);
 		}
 		
 		// Losuj zakazonego
-		agenci[generator.nextInt(liczbaAgentow)].zachoruj();
+		agenci[Generator.getInstance().nextInt(liczbaAgentow)].zachoruj();
 
 		zapis.println("# agenci jako: id typ lub id* typ dla chorego");
 		for (Agent agent : agenci) {
@@ -107,17 +111,20 @@ public class Symulacja {
 	private void przeprowadzDzien(int nrDnia) {
 		// Sprawdz czy ktos umrze / ozdrowieje
 		for (Agent agent : agenci) {
-			agent.obudzSie(generator, prawdWyzdrowienia, smiertelnosc);
+			agent.obudzSie(prawdWyzdrowienia, smiertelnosc);
 		}
 
 		// Planuj spotkania
 		for (Agent agent : agenci) {
-			spotkania.addAll(agent.planujSpotkania(nrDnia, liczbaDni-nrDnia, generator, prawdSpotkania));
+			spotkania.addAll(agent.planujSpotkania(
+				nrDnia,
+				liczbaDni - nrDnia,
+				prawdSpotkania));
 		}
 		
 		// Spotkaj sie
 		while (!spotkania.isEmpty() && spotkania.first().dajDzien() == nrDnia) {
-			spotkania.pollFirst().przeprowadz();
+			spotkania.pollFirst().przeprowadz(prawdZarazenia);
 		}
 		
 		int zdrowi = 0;
@@ -149,13 +156,13 @@ public class Symulacja {
 	public static void main(String[] args) {
 		try {
 			Symulacja symulacja = new Symulacja(
-				110090, // seed
-				100,	// liczba agentow
-				50,		// liczba dni
-				15,		// sr liczba znajomych
-				0.05,	// procent towarzyskich
-				0.5,	// chec spotkan
-				0.1,	// zarazliwosc
+				1600,	// seed
+				10,		// liczba agentow
+				100,		// liczba dni
+				2,		// sr liczba znajomych
+				0.6,	// procent towarzyskich
+				0.7,	// chec spotkan
+				0.5,	// zarazliwosc
 				0.01,	// ozdrowienia
 				0.01,	// smiertelnosc
 				"plik.txt");
