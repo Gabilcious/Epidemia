@@ -22,10 +22,12 @@ public class Normalny extends Agent {
 		}
 
 		while (Generator.getInstance().nextDouble() <= prawdSpotkania) {
-			spotkania.add(new Spotkanie(
-				this,
-				znajomi.get(Generator.getInstance().nextInt(liczbaZnajomych)),
-				Generator.getInstance().nextInt(pozostaleDni + 1) + dzien + 1));
+			spotkania.add(
+				new Spotkanie(
+					this,
+					znajomi.get(Generator.getInstance().nextInt(liczbaZnajomych)),
+					Generator.getInstance().nextInt(pozostaleDni + 1) + dzien + 1
+			));
 		}
 		return spotkania;
 	}

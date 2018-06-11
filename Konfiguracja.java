@@ -5,100 +5,137 @@ import java.io.InputStreamReader;
 import java.util.Properties;
 import java.nio.charset.Charset;
 import java.io.FileNotFoundException;
-import java.lang.NullPointerException;
-import java.lang.NumberFormatException;
-
-
-
 
 public class Konfiguracja {
+	public int
+		seed,
+		liczbaAgentow,
+		liczbaDni,
+		srZnajomych;
+	public Double
+		smiertelnosc,
+		prawdTowarzyski,
+		prawdSpotkania,
+		prawdZarazenia,
+		prawdWyzdrowienia;
+	public String plikZRaportem;
 
-	Integer seed;
-	Integer liczbaAgentow;
-	Integer liczbaDni;
-	Integer srZnajomych;
-	Double smiertelnosc;
-	Double prawdTowarzyski;
-	Double prawdSpotkania;
-	Double prawdZarazenia;
-	Double prawdWyzdrowienia;
-	String plikZRaportem;
-
-	static int pobierzInteger(
+	private static int pobierzInteger(
 			Properties domyslneWartosci,
 			Properties wartosciSymulacji,
 			String klucz) {
 		return Konfiguracja.pobierzInteger(
-			domyslneWartosci, wartosciSymulacji, klucz,
-			Integer.MIN_VALUE, Integer.MAX_VALUE);
+			domyslneWartosci,
+			wartosciSymulacji,
+			klucz,
+			Integer.MIN_VALUE,
+			Integer.MAX_VALUE
+		);
 	}
 
-	static Integer pobierzInteger(
-			Properties domyslneWartosci, Properties wartosciSymulacji,
-			String klucz, int odWartosci, int doWartosci) {
+	private static Integer pobierzInteger(
+			Properties domyslneWartosci,
+			Properties wartosciSymulacji,
+			String klucz,
+			int odWartosci,
+			int doWartosci) {
 		Properties wartosci = Konfiguracja.znajdzKlucz(
-				domyslneWartosci, wartosciSymulacji, klucz);
+			domyslneWartosci,
+			wartosciSymulacji,
+			klucz
+		);
+		String surowaWartosc = wartosci.getProperty(klucz);
 		Integer wartosc = null;
 		try {
-			wartosc = Integer.parseInt(wartosci.getProperty(klucz));
+			wartosc = Integer.parseInt(surowaWartosc);
 			if (wartosc < odWartosci || wartosc > doWartosci) {
 				System.out.println(
 					String.format(
-						"Zla wartość klucza %s (%d - %d)",
-						klucz, odWartosci, doWartosci));
+						"Niedozwolona wartość %d dla klucza %s",
+						wartosc,
+						klucz
+				));
 				System.exit(0);
 			}
 			return wartosc;
-		} catch (NumberFormatException ex) {
-			System.out.println("Brak klucza " + klucz);
+		}
+		catch (NumberFormatException ex) {
+			if (surowaWartosc == null) {
+				System.out.println("Brak wartości dla klucza " + klucz);
+			}
+			else {
+				System.out.println(
+					String.format(
+						"Niedozwolona wartość \"%s\" dla klucza %s",
+						surowaWartosc,
+						klucz
+				));
+			}
 			System.exit(0);
 		}
 		return wartosc;
 	}
 
-	static Double pobierzDouble(
+	private static Double pobierzDouble(
 			Properties domyslneWartosci,
 			Properties wartosciSymulacji,
 			String klucz) {
 		Properties wartosci = Konfiguracja.znajdzKlucz(
-				domyslneWartosci, wartosciSymulacji, klucz);
+			domyslneWartosci,
+			wartosciSymulacji,
+			klucz
+		);
+		String surowaWartosc = wartosci.getProperty(klucz);
 		Double wartosc = null;
 		try {
-			wartosc = Double.parseDouble(wartosci.getProperty(klucz));
+			wartosc = Double.parseDouble(surowaWartosc);
 			if (wartosc < 0 || wartosc > 1) {
 				System.out.println(
 					String.format(
-						"Zla wartość klucza %s (0 - 1)", klucz));
+						"Niedozwolona wartość %f dla klucza %s",
+						wartosc,
+						klucz
+				));
 				System.exit(0);
 			}
 			return wartosc;
-		} catch (NullPointerException ex) {
-			System.out.println("Brak klucza " + klucz);
+		}
+		catch (NumberFormatException | NullPointerException ex) {
+			if (surowaWartosc == null) {
+				System.out.println("Brak wartości dla klucza " + klucz);
+			}
+			else {
+				System.out.println(
+					String.format(
+						"Niedozwolona wartość \"%s\" dla klucza %s",
+						surowaWartosc,
+						klucz
+				));
+			}
 			System.exit(0);
 		}
 		return wartosc;
 	}
 
-	static String pobierzNapis(
+	private static String pobierzNapis(
 			Properties domyslneWartosci,
 			Properties wartosciSymulacji,
 			String klucz) {
 		Properties wartosci = Konfiguracja.znajdzKlucz(
-				domyslneWartosci, wartosciSymulacji, klucz);
+			domyslneWartosci,
+			wartosciSymulacji,
+			klucz
+		);
 		String wartosc = wartosci.getProperty(klucz);
-		if (wartosc == null) {
-			System.out.println("Brak klucza " + klucz);
-			System.exit(0);
-		}
-		if (wartosc.isEmpty()) {
-			System.out.println("Pusty napis dla klucza " + klucz);
+		if (wartosc == null || wartosc.isEmpty()) {
+			System.out.println("Brak wartości dla klucza " + klucz);
 			System.exit(0);
 		}
 		return wartosc;
 	}
 				
 
-	static Properties znajdzKlucz(
+	private static Properties znajdzKlucz(
 			Properties domyslneWartosci,
 			Properties wartosciSymulacji,
 			String klucz) {
@@ -108,7 +145,9 @@ public class Konfiguracja {
 		return domyslneWartosci;
 	}
 		
-	static Konfiguracja zPlikow(String nazwaPlikuDomyslnego, String nazwaPlikuSymulacji) {
+	public static Konfiguracja zPlikow(
+			String nazwaPlikuDomyslnego,
+			String nazwaPlikuSymulacji) {
 		Properties domyslneWartosci = Konfiguracja.dajWartosci(nazwaPlikuDomyslnego);
 		Properties wartosciSymulacji = Konfiguracja.dajWartosci(nazwaPlikuSymulacji);
 		Konfiguracja konf = new Konfiguracja();
@@ -129,18 +168,18 @@ public class Konfiguracja {
 		konf.liczbaDni = Konfiguracja.pobierzInteger(
 			domyslneWartosci, wartosciSymulacji, "liczbaDni", 1, 1000);
 		konf.srZnajomych = Konfiguracja.pobierzInteger(
-			domyslneWartosci, wartosciSymulacji, "liczbaDni", 0,
-			konf.liczbaAgentow);
+			domyslneWartosci, wartosciSymulacji, "śrZnajomych", 0, konf.liczbaAgentow - 1);
 		konf.plikZRaportem = Konfiguracja.pobierzNapis(
 			domyslneWartosci, wartosciSymulacji, "plikZRaportem");
 		return konf;
 	}
 
-	static Properties dajWartosci(String nazwaPliku) {
+	private static Properties dajWartosci(String nazwaPliku) {
 		InputStream wejscie = null;
 		try {
 			wejscie = new FileInputStream(nazwaPliku);
-		} catch (FileNotFoundException ex) {
+		}
+		catch (FileNotFoundException ex) {
 			System.out.println("Brak pliku " + nazwaPliku);
 			System.exit(0);
 		}
@@ -149,15 +188,30 @@ public class Konfiguracja {
 
 		try {
 			if (rozszerzenie.equals("properties")) {
-				wartosci.load(new InputStreamReader(wejscie, Charset.forName("UTF-8")));
-			} else if (rozszerzenie.equals("xml")) {
+				wartosci.load(
+					new InputStreamReader(
+						wejscie,
+						Charset.forName("UTF-8")
+				));
+			}
+			else if (rozszerzenie.equals("xml")) {
 				wartosci.loadFromXML(wejscie);
 			}
-		} catch (IOException ex) {}
+		}
+		catch (IOException ex) {
+			if (rozszerzenie.equals("properties")) {
+				System.out.println("default.properties nie jest tekstowy");
+				System.exit(0);
+			}
+			else if (rozszerzenie.equals("xml")) {
+				System.out.println("simulation-conf.xml nie jest XML");
+				System.exit(0);
+			}
+		}
 		return wartosci;
 	}
 
-	static String dajRozszerzenie(String nazwaPliku) {
+	private static String dajRozszerzenie(String nazwaPliku) {
 		String extension = "";
 		int i = nazwaPliku.lastIndexOf('.');
 		if (i > 0) {

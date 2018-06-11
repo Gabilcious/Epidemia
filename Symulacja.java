@@ -19,36 +19,28 @@ public class Symulacja {
 	private TreeSet <Spotkanie> spotkania;
 	private PrintWriter zapis;
 
-	public Symulacja (
-			int seed,
-			int liczbaAgentow,
-			int liczbaDni,
-			int srZnajomych,
-			double pTowarzyski,
-			double pSpotkania,
-			double pZarazenia,
-			double pWyzdrowienia,
-			double smiertelnosc,
-			String nazwaPliku) throws FileNotFoundException {
-		this.agenci = new Agent[liczbaAgentow];
+	public Symulacja (Konfiguracja konf) {
+		this.agenci = new Agent[konf.liczbaAgentow];
 		this.spotkania = new TreeSet<Spotkanie>(new Cmp());
-		this.seed = seed;
-		this.liczbaAgentow = liczbaAgentow;
-		this.liczbaDni = liczbaDni;
-		this.srZnajomych = srZnajomych;
-		this.prawdTowarzyski = pTowarzyski;
-		this.prawdSpotkania = pSpotkania;
-		this.prawdZarazenia = pZarazenia;
-		this.prawdWyzdrowienia = pWyzdrowienia;
-		this.smiertelnosc = smiertelnosc;
+		this.seed = konf.seed;
+		this.liczbaAgentow = konf.liczbaAgentow;
+		this.liczbaDni = konf.liczbaDni;
+		this.srZnajomych = konf.srZnajomych;
+		this.prawdTowarzyski = konf.prawdTowarzyski;
+		this.prawdSpotkania = konf.prawdSpotkania;
+		this.prawdZarazenia = konf.prawdZarazenia;
+		this.prawdWyzdrowienia = konf.prawdWyzdrowienia;
+		this.smiertelnosc = konf.smiertelnosc;
 		try {
-			this.zapis = new PrintWriter(nazwaPliku);
+			this.zapis = new PrintWriter(konf.plikZRaportem);
 		}
-		catch (FileNotFoundException ex)
-		{
-
+		catch (FileNotFoundException ex) {
+			System.out.println(
+				"Niedozwolona wartość \"" + konf.plikZRaportem + "\" dla klucza plikZRaportem"
+			);
+			System.exit(0);
 		}
-		Generator.init(seed);
+		Generator.init(konf.seed);
 
 		zapis.println("# twoje wyniki powinny zawierać te komentarze");
 		zapis.println("seed=" + this.seed);
@@ -116,10 +108,12 @@ public class Symulacja {
 
 		// Planuj spotkania
 		for (Agent agent : agenci) {
-			spotkania.addAll(agent.planujSpotkania(
-				nrDnia,
-				liczbaDni - nrDnia,
-				prawdSpotkania));
+			spotkania.addAll(
+				agent.planujSpotkania(
+					nrDnia,
+					liczbaDni - nrDnia,
+					prawdSpotkania
+			));
 		}
 		
 		// Spotkaj sie
@@ -153,22 +147,12 @@ public class Symulacja {
 		zapis.close();
 	}
 
-	public static void main(String[] args) {
-		try {
-			Symulacja symulacja = new Symulacja(
-				1600,	// seed
-				10,		// liczba agentow
-				100,		// liczba dni
-				2,		// sr liczba znajomych
-				0.6,	// procent towarzyskich
-				0.7,	// chec spotkan
-				0.5,	// zarazliwosc
-				0.01,	// ozdrowienia
-				0.01,	// smiertelnosc
-				"plik.txt");
-			symulacja.przeprowadzSymulacje();
-		}
-		catch (FileNotFoundException ex) {
-		}
+	public static void main(String[] args) throws Exception {
+		Symulacja symulacja = new Symulacja(
+			Konfiguracja.zPlikow(
+				"default.properties",
+				"simulation-conf.xml"
+		));
+		symulacja.przeprowadzSymulacje();
 	}
 }
